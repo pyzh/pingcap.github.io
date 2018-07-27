@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>PingCAP Site</title>
+    <link>https://pingcap.com/recruit/</link>
+    <description>Recent content on PingCAP Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    
+	<atom:link href="https://pingcap.com/recruit/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title></title>
+      <link>https://pingcap.com/recruit/TOC/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pingcap.com/recruit/TOC/</guid>
+      <description> TiDB Recruit Directory  engineer  Software Engineer for TiDB Software Engineer for TiKV   </description>
+    </item>
+    
+    <item>
+      <title>Software Engineer for TiDB</title>
+      <link>https://pingcap.com/recruit/engineer/software-engineer-for-tidb/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pingcap.com/recruit/engineer/software-engineer-for-tidb/</guid>
+      <description>Software Engineer for TiDB Minimum qualifications  BA/BS degree in Computer Science or related technical field or equivalent practical experience. 2 years of professional software development experience. Experience with one or more programming languages including C, C++, Java and Go.  Preferred qualifications  Experience with Unix/Linux environments. Experience with designing and deploying large scale distributed systems. Experience in concurrency, multithreading and synchronization. Experience with database internals, database language theories, database design, SQL and database programming.</description>
+    </item>
+    
+    <item>
+      <title>Software Engineer for TiKV</title>
+      <link>https://pingcap.com/recruit/engineer/software-engineer-for-tikv/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://pingcap.com/recruit/engineer/software-engineer-for-tikv/</guid>
+      <description>Software Engineer for TiKV Qualifications  Solid development experience on distributed systems, understanding distributed transactions and consensus algorithms like Paxos or Raft. Development experience on high performance services, knowledge of performance testing and system optimisation based on relevant profile tools such as FlameGraph. Testing experience on distributed systems, knowledge of how to create corner cases of distributed environments and verification of system stability. Familiar with Rust or C or C++.</description>
+    </item>
+    
+  </channel>
+</rss>

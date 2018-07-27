@@ -1,0 +1,417 @@
+/* footer module */
+/* base */
+@font-face {
+  font-family: "Lato";
+  src: url("https://download.pingcap.com/fonts/lato/lato-regular-webfont.eot"), url("https://download.pingcap.com/fonts/lato/lato-regular-webfont.ttf"), url("https://download.pingcap.com/fonts/lato/lato-regular-webfont.woff");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "TitilliumWeb";
+  src: url("https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.eot"), url("https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.ttf"), url("https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.woff");
+  font-weight: normal;
+  font-style: normal;
+}
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(1em);
+            transform: translateY(1em);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(1em);
+            transform: translateY(1em);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+@-webkit-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -100%, 0);
+            transform: translate3d(0, -100%, 0);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -100%, 0);
+            transform: translate3d(0, -100%, 0);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+body {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  font-family: "Lato", "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", Arial, sans-serif;
+}
+html,
+body {
+  font-size: 18px;
+}
+body,
+body * {
+  box-sizing: border-box;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+input,
+button,
+select,
+textarea {
+  outline: none;
+}
+button,
+input[type="submit"],
+input[type="button"] {
+  -webkit-appearance: none;
+}
+a,
+p a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease-out;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: "TitilliumWeb", "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", Arial, sans-serif;
+}
+.link,
+.link:active,
+.link:focus,
+.link:hover,
+.link:link,
+.link:visited {
+  transition: color 0.15s ease-in;
+}
+.container {
+  max-width: 1288px;
+  margin: 0 auto;
+}
+.f-blk,
+.f-img,
+.f-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.f-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+.f-hide {
+  display: none;
+}
+.f-fl {
+  float: left;
+}
+.f-fr {
+  float: right;
+}
+.f-tf {
+  text-align: left;
+}
+.f-tr {
+  text-align: right;
+}
+.f-tc {
+  text-align: center;
+}
+.f-vc {
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+}
+.f-vhc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+}
+/* 大屏幕 */
+@media (min-width: 992px) {
+  html,
+  body {
+    font-size: 20px;
+  }
+}
+/* 超大屏幕 */
+@media (min-width: 1920px) {
+  html,
+  body {
+    font-size: 22px;
+  }
+  .container {
+    max-width: 1520px;
+  }
+}
+/* 小屏幕（平板，大于等于 768px） */
+@media (max-width: 768px) {
+  html,
+  body {
+    font-size: 16px;
+  }
+}
+#wechat {
+  position: relative;
+}
+.subscribe {
+  width: 100%;
+  max-width: 192px;
+  max-width: 12rem;
+  margin-top: 20px;
+}
+.subscribe .form-inline {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+.subscribe .form-control {
+  width: calc(100% -  70px);
+  height: 32px;
+  background-color: rgba(255, 255, 255, .12);
+  border: 1px solid rgba(255, 255, 255, 0);
+  border-radius: 0;
+  padding: 0 10px;
+  color: #f5f5f5;
+  font-size: 12px;
+}
+.subscribe .form-control:hover,
+.subscribe .form-control:focus {
+  border-color: rgba(58, 89, 240, .5);
+}
+.subscribe .btn {
+  min-width: 70px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0 5px;
+  border-radius: 0;
+  border: 1px solid rgba(255, 255, 255, 0);
+  background-color: #3a59f0;
+  font-size: 12px;
+  color: white;
+}
+.subscribe .btn:hover {
+  background-color: white;
+  border-color: white;
+  color: #3a59f0;
+  transition: all 0.5s ease;
+}
+.qr_code_outer {
+  position: absolute;
+  right: 158px;
+  top: -100px;
+}
+.qr_code_outer .qr_code {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 158px;
+  padding: 12px 15px;
+  border: 1px solid #d9dadc;
+  background-color: white;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+.qr_code_outer .qr_code p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 9.6px;
+  font-size: 0.6rem;
+  color: #333;
+  font-weight: 300;
+}
+.qr_code_outer .qr_code .qr_code_img {
+  width: 116px;
+  height: 116px;
+}
+.qr_code_outer #close_qrcode {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  padding: 10px;
+}
+.qr_code_outer #close_qrcode svg {
+  display: block;
+}
+.copyright {
+  padding: 0 12px;
+  padding: 0 0.75rem;
+  font-size: 11.2px;
+  font-size: 0.7rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, .7);
+}
+.btn-lang {
+  font-size: 11.2px;
+  font-size: 0.7rem;
+  color: white;
+  text-decoration: underline;
+}
+.btn-lang:hover {
+  color: #3a59f0;
+  transition: all 0.5s ease;
+}
+/** add ellipsis in a line **/
+footer {
+  width: 100%;
+  padding: 24px 0;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, .3);
+  background-color: rgba(0, 0, 0, .9);
+  color: white;
+}
+footer .container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+footer .flex-list h4 {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+footer .flex-list ul {
+  padding-left: 0;
+  list-style: none;
+}
+footer .flex-list ul li {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, .7);
+  font-weight: 300;
+}
+footer .flex-list ul li a {
+  color: inherit;
+  font-weight: inherit;
+}
+footer .flex-list ul li a svg {
+  fill: #fff;
+  margin-right: 4px;
+}
+footer .flex-list ul li a.twitter:hover svg {
+  fill: #00baf0;
+}
+footer .flex-list ul li a.linkedin:hover svg {
+  fill: #0079b2;
+}
+footer .flex-list ul li a.reddit:hover svg {
+  fill: #d80000;
+}
+footer .flex-list ul li a.google-plus:hover svg {
+  fill: #c43c2c;
+}
+footer .flex-list ul li a.stack-overflow:hover svg {
+  fill: #f48024;
+}
+footer .flex-list ul li a.wechat:hover svg {
+  fill: #1aad19;
+}
+footer .flex-list-wrap {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  width: 74%;
+}
+footer .flex-list-wrap .flex-list {
+  -webkit-box-flex: 24%;
+      -ms-flex: 24%;
+          flex: 24%;
+  padding: 0 12px;
+  padding: 0 0.75rem;
+}
+footer .contact-list-wrap {
+  width: 25%;
+  border-left: 1px solid rgba(255, 255, 255, .3);
+  padding-left: 40px;
+}
+footer .contact-list-wrap ul li a {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+@media (min-width: 880px) {
+  footer {
+    height: 350px;
+  }
+}
+@media (max-width: 879px) {
+  footer .container,
+  footer .flex-list-wrap,
+  footer .contact-list-wrap {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  footer .container .flex-list,
+  footer .flex-list-wrap .flex-list,
+  footer .contact-list-wrap .flex-list {
+    width: 100%;
+  }
+  footer .contact-list-wrap {
+    display: none;
+  }
+  footer .btn-lang {
+    display: none;
+  }
+}

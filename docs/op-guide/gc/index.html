@@ -1,0 +1,3968 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>TiDB Garbage Collection (GC)| PingCAP</title>
+<script>
+window.ga =
+  window.ga ||
+  function() {
+    ;(ga.q = ga.q || []).push(arguments)
+  }
+ga.l = +new Date()
+ga('create', 'UA-99991864-4', 'auto')
+ga('send', 'pageview')
+</script>
+<script async src="https://download.pingcap.com/js/ga-analytics.js"></script>
+
+ 
+  
+
+
+
+  
+
+
+
+  
+
+
+<link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="canonical" href="https://www.pingcap.com/">
+<meta name="description" content="Use Garbage Collection (GC) to clear the obsolete data of TiDB.">
+<meta name="robots" content="noodp">
+<meta name="keywords" content="SQL, HTAP, Open Source, Cloud-Native, NewSQL">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TiDB Garbage Collection (GC)">
+<meta property="og:description" content="Use Garbage Collection (GC) to clear the obsolete data of TiDB.">
+<meta property="og:url" content="https://pingcap.com/docs/op-guide/gc/">
+<meta property="og:site_name" content="PingCAP">
+<meta property="og:image" content="https://pingcap.com/images/pingcap-opengraph.jpg">
+<meta property="og:image:secure_url" content="https://pingcap.com/images/pingcap-opengraph.jpg">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:description" content="Use Garbage Collection (GC) to clear the obsolete data of TiDB.">
+<meta name="twitter:title" content="TiDB Garbage Collection (GC)">
+<meta name="twitter:site" content="@pingcap">
+<meta name="twitter:image:src" content="https://pingcap.com/images/pingcap-opengraph.jpg">
+<meta name="twitter:creator" content="@pingcap">
+
+
+<script type="text/javascript" src="//script.crazyegg.com/pages/scripts/0076/9903.js" async="async"></script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "http:\/\/schema.org",
+  "@type": "WebSite",
+  "url": "https:\/\/www.pingcap.com\/",
+  "name": "PingCAP",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https:\/\/www.pingcap.com\/?s={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<style media="screen">.st_tree{display:none}</style>
+  <link rel="stylesheet" href="https://download.pingcap.com/style/github-markdown.css" />
+  
+  
+  
+  
+  
+  
+<script type="text/javascript">"/"===location.pathname&&"pingcap.github.io"===location.hostname&&(location.href="/en/")</script><link href="/js/../css/style.min.css" rel="stylesheet"></head><body >   
+
+<header role="navigation" class="fixed-top">
+  <div class="container">
+    <a class="nav-brand" href="/en"><img src="/images/pingcap-logo.png" alt="PingCAP"></a>
+    <div class="nav-wrapper">
+      <div class="navigation">
+        <ul>
+          <li class="sel"><a href="/docs">Docs</a></li>
+          <li ><a href="/cases">Use Cases</a></li>
+          <li ><a href="/blog">Blog</a></li>
+          <li ><a href="/weekly">Weekly</a></li>
+          <li ><a href="/about">About</a></li>
+          <li><a class="link-download" href="https://meetings.hubspot.com/kevin255" target="_blank">Request Demo</a></li>
+        </ul>
+      </div>
+      <div class="global-search">
+        <div class="search-wrapper">
+          <span class="icon-search"><svg
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	version="1.1"
+	width="18"
+	height="18"
+	fill="#fff"
+	viewBox="0 0 67.125 67.125"
+	xml:space="preserve">
+	<g>
+		<g>
+			<path
+				d="M23.902,0C11.01,0,0.523,10.488,0.523,23.38c0,12.891,10.487,23.379,23.379,23.379c5.461,0,10.487-1.887,14.471-5.037    l24.816,24.817c0.391,0.391,0.902,0.586,1.414,0.586s1.023-0.195,1.414-0.586c0.781-0.78,0.781-2.048,0-2.828L41.293,38.985    c3.721-4.142,5.989-9.613,5.989-15.605C47.282,10.488,36.794,0,23.902,0z M4.523,23.38C4.523,12.694,13.216,4,23.902,4    c10.687,0,19.38,8.694,19.38,19.38c0,5.396-2.221,10.279-5.791,13.795c-0.175,0.092-0.342,0.202-0.488,0.349    c-0.105,0.105-0.194,0.222-0.271,0.343C33.31,40.9,28.825,42.76,23.903,42.76C13.217,42.759,4.523,34.065,4.523,23.38z"/>
+			<path d="M24.075,8.591c-8.25,0-14.962,6.712-14.962,14.962c0,1.104,0.896,2,2,2s2-0.896,2-2c0-6.044,4.918-10.962,10.962-10.962    c1.104,0,2-0.896,2-2S25.18,8.591,24.075,8.591z"/>
+		</g>
+	</g>
+</svg>
+</span>
+          <style>
+     
+    .algolia-autocomplete .ds-dropdown-menu {
+        position: relative;
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #d9d9d9;
+        margin: 4 0 4 0;
+        background: #fafafa;
+        border-radius: 3px;
+        font-size: 16px;
+    }
+    .algolia-autocomplete .ds-dropdown-menu [class^="ds-dataset-"] {
+      border: none!important;
+    }
+
+    .algolia-autocomplete .algolia-docsearch-suggestion {
+        padding: 0 4px!important;
+    }
+
+    .algolia-autocomplete .algolia-docsearch-suggestion--wrapper {
+        padding: 4px 0 0!important;
+    }
+
+    .algolia-autocomplete .algolia-docsearch-suggestion .algolia-docsearch-suggestion--category-header {
+        border-bottom: 1px solid #ddd;
+        margin: 0;
+        padding: 6px 8px;
+        text-transform: uppercase;
+        color: #3a59f0;
+        font-size: 0.9em;
+    }
+
+    .algolia-docsearch-suggestion.algolia-docsearch-suggestion__secondary .algolia-docsearch-suggestion--subcategory-column {
+        font-size: 0.7em;
+        background: none;
+    }
+
+    @media (max-width: 600px) {
+      .global-search .algolia-autocomplete .ds-dropdown-menu {
+        min-width: 372px !important;
+      }
+
+      .global-search .algolia-autocomplete.algolia-autocomplete-right .ds-dropdown-menu {
+         right: -45px !important;
+       }
+    }
+
+    @media (max-width: 375px) {
+      .global-search .algolia-autocomplete .ds-dropdown-menu {
+        min-width: 350px !important;
+      }
+    }
+
+    @media (max-width: 320px) {
+      .global-search .algolia-autocomplete .ds-dropdown-menu {
+        min-width: 308px !important;
+      }
+
+      .global-search .algolia-autocomplete.algolia-autocomplete-right .ds-dropdown-menu {
+         right: -40px !important;
+       }
+    }
+</style>
+
+<input type="search" id="search-input" placeholder="Search...">
+
+        </div>
+      </div>
+    </div>
+    <div class="nav-btn nav-slider">
+      <i class="material-icons"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" width="16" height="16" viewBox="0 0 459 459" xml:space="preserve">
+<g>
+	<g id="menu">
+		<path d="M0,382.5h459v-51H0V382.5z M0,255h459v-51H0V255z M0,76.5v51h459v-51H0z" fill="#FFFFFF"/>
+	</g>
+</g>
+</svg>
+</i>
+    </div>
+  </div>
+</header>
+ 
+
+
+<nav class="mobile-sidebar">
+  <div class="nav-header">
+    <div class="logo-wrap">
+      <a class="nav-brand" href="/en"><img src="/images/pingcap-logo.png" alt="PingCAP"></a>
+    </div>
+  </div>
+  <ul class="ul-base">
+    <li class="sel"><a href="/docs">Docs</a></li>
+    <li ><a href="/cases">Use Cases</a></li>
+    <li ><a href="/blog">Blog</a></li>
+    <li ><a href="/weekly">Weekly</a></li>
+    <li ><a href="/about">About</a></li>
+    <li><a class="link-download" href="https://meetings.hubspot.com/kevin255" target="_blank">Request Demo</a></li>
+  </ul>
+  <div class="nav-footer">
+    <div class="contact-list-wrap">
+      <div class="flex-list">
+        <h4 class="list-title"><strong>Contact</strong></h4>
+        <ul class="social ul-base">
+          <li><a href="https://twitter.com/PingCAP" class="twitter" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 612 612" xml:space="preserve" width="18" height="18">
+<g>
+	<g>
+		<path d="M612,116.258c-22.525,9.981-46.694,16.75-72.088,19.772c25.929-15.527,45.777-40.155,55.184-69.411    c-24.322,14.379-51.169,24.82-79.775,30.48c-22.907-24.437-55.49-39.658-91.63-39.658c-69.334,0-125.551,56.217-125.551,125.513    c0,9.828,1.109,19.427,3.251,28.606C197.065,206.32,104.556,156.337,42.641,80.386c-10.823,18.51-16.98,40.078-16.98,63.101    c0,43.559,22.181,81.993,55.835,104.479c-20.575-0.688-39.926-6.348-56.867-15.756v1.568c0,60.806,43.291,111.554,100.693,123.104    c-10.517,2.83-21.607,4.398-33.08,4.398c-8.107,0-15.947-0.803-23.634-2.333c15.985,49.907,62.336,86.199,117.253,87.194    c-42.947,33.654-97.099,53.655-155.916,53.655c-10.134,0-20.116-0.612-29.944-1.721c55.567,35.681,121.536,56.485,192.438,56.485    c230.948,0,357.188-191.291,357.188-357.188l-0.421-16.253C573.872,163.526,595.211,141.422,612,116.258z" />
+	</g>
+</g>
+</svg>
+</a></li>
+          <li><a href="https://www.linkedin.com/company/pingcap/" class="linkedin" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="18" height="18" viewBox="0 0 438.536 438.535" xml:space="preserve">
+<g>
+	<g>
+		<rect x="5.424" y="145.895" width="94.216" height="282.932"/>
+		<path d="M408.842,171.739c-19.791-21.604-45.967-32.408-78.512-32.408c-11.991,0-22.891,1.475-32.695,4.427
+			c-9.801,2.95-18.079,7.089-24.838,12.419c-6.755,5.33-12.135,10.278-16.129,14.844c-3.798,4.337-7.512,9.389-11.136,15.104
+			v-40.232h-93.935l0.288,13.706c0.193,9.139,0.288,37.307,0.288,84.508c0,47.205-0.19,108.777-0.572,184.722h93.931V270.942
+			c0-9.705,1.041-17.412,3.139-23.127c4-9.712,10.037-17.843,18.131-24.407c8.093-6.572,18.13-9.855,30.125-9.855
+			c16.364,0,28.407,5.662,36.117,16.987c7.707,11.324,11.561,26.98,11.561,46.966V428.82h93.931V266.664
+			C438.529,224.976,428.639,193.336,408.842,171.739z"/>
+		<path d="M53.103,9.708c-15.796,0-28.595,4.619-38.4,13.848C4.899,32.787,0,44.441,0,58.529c0,13.891,4.758,25.505,14.275,34.829
+			c9.514,9.325,22.078,13.99,37.685,13.99h0.571c15.99,0,28.887-4.661,38.688-13.99c9.801-9.324,14.606-20.934,14.417-34.829
+			c-0.19-14.087-5.047-25.742-14.561-34.973C81.562,14.323,68.9,9.708,53.103,9.708z"/>
+	</g>
+</g>
+</svg>
+</a></li>
+          <li><a href="https://www.reddit.com/r/TiDB/" class="reddit" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 279.748 279.748" xml:space="preserve" width="18" height="18">
+<path d="M279.748,133.142c0-19.299-15.701-35-35-35c-10.768,0-20.674,4.812-27.279,13.064
+	c-18.532-8.431-39.663-13.626-62.015-15.271l19.206-60.692l42.895,9.294c3.285,12.782,14.901,22.258,28.693,22.258
+	c16.336,0,29.627-13.29,29.627-29.626c0-16.336-13.291-29.627-29.627-29.627c-11.801,0-21.999,6.941-26.759,16.95l-49.497-10.725
+	c-5.041-1.092-10.094,1.833-11.651,6.756l-23.705,74.907c-26.164,0.638-50.988,6.053-72.356,15.775
+	C55.674,102.954,45.768,98.142,35,98.142c-19.299,0-35,15.701-35,35c0,9.373,3.683,18.173,10.222,24.709
+	c-3.9,8.37-5.875,17.076-5.875,25.936c0,24.048,14.396,46.492,40.538,63.199c25.447,16.264,59.183,25.221,94.989,25.221
+	c35.808,0,69.542-8.957,94.989-25.221c26.142-16.707,40.538-39.151,40.538-63.199c0-8.859-1.975-17.565-5.875-25.936
+	C276.065,151.314,279.748,142.515,279.748,133.142z M15.369,145.139c-2.212-3.59-3.369-7.688-3.369-11.997c0-12.682,10.317-23,23-23
+	c5.444,0,10.558,1.851,14.649,5.258C35.027,123.702,23.517,133.689,15.369,145.139z M68.04,165.405c0-13.785,11.215-25,25-25
+	c13.785,0,25,11.215,25,25c0,13.785-11.215,25-25,25C79.255,190.405,68.04,179.19,68.04,165.405z M191.159,222.459
+	c-9.745,10.637-29.396,17.244-51.285,17.244c-21.888,0-41.539-6.607-51.284-17.244c-1.805-1.97-2.733-4.525-2.617-7.192
+	c0.116-2.669,1.266-5.133,3.235-6.937c1.849-1.694,4.247-2.627,6.754-2.627c2.797,0,5.484,1.183,7.373,3.244
+	c5.803,6.333,20.827,10.756,36.539,10.756c15.712,0,30.737-4.423,36.539-10.756c1.889-2.062,4.576-3.244,7.374-3.244
+	c2.508,0,4.906,0.933,6.755,2.627c1.97,1.804,3.118,4.268,3.234,6.937C193.893,217.934,192.964,220.489,191.159,222.459z
+	 M186.708,190.405c-13.785,0-25-11.215-25-25c0-13.785,11.215-25,25-25c13.785,0,25,11.215,25,25
+	C211.708,179.19,200.493,190.405,186.708,190.405z M264.379,145.139c-8.147-11.45-19.657-21.436-34.28-29.739
+	c4.092-3.408,9.205-5.258,14.649-5.258c12.683,0,23,10.318,23,23C267.748,137.451,266.591,141.549,264.379,145.139z"/>
+</svg>
+</a></li>
+          <li><a href="https://groups.google.com/forum/#!forum/tidb-user" class="google-plus" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 491.858 491.858" xml:space="preserve" width="18" height="18">
+<g>
+	<g>
+		<g>
+			<path d="M377.472,224.957H201.319v58.718H308.79c-16.032,51.048-63.714,88.077-120.055,88.077     c-69.492,0-125.823-56.335-125.823-125.824c0-69.492,56.333-125.823,125.823-125.823c34.994,0,66.645,14.289,89.452,37.346     l42.622-46.328c-34.04-33.355-80.65-53.929-132.074-53.929C84.5,57.193,0,141.693,0,245.928s84.5,188.737,188.736,188.737     c91.307,0,171.248-64.844,188.737-150.989v-58.718L377.472,224.957L377.472,224.957z" />
+			<polygon points="491.858,224.857 455.827,224.857 455.827,188.826 424.941,188.826 424.941,224.857 388.91,224.857      388.91,255.74 424.941,255.74 424.941,291.772 455.827,291.772 455.827,255.74 491.858,255.74" />
+		</g>
+	</g>
+</g>
+</svg>
+</a></li>
+          <li><a href="https://stackoverflow.com/questions/tagged/tidb" class="stack-overflow" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="18" height="18" viewBox="0 0 547.597 547.597" xml:space="preserve">
+<g>
+	<g>
+		<path d="M140.81,475.111h0.024l189.91-0.269c8.434-0.013,15.3-6.886,15.3-15.318v-21.298c0-8.428-6.854-15.288-15.3-15.288
+			l-189.91,0.264c-8.433,0.012-15.3,6.885-15.3,15.318v21.31C125.535,468.257,132.389,475.111,140.81,475.111z"/>
+		<path d="M58.667,517.854c0.073,29.26,0.073,29.449,3.072,29.449c0.018,0,0.037,0,0.055,0l10.612,0.294c0.031,0,0.055,0,0.086,0
+			c0,0,85.814,0,171.629-0.036c42.914-0.019,85.821-0.05,118-0.092c16.09-0.019,29.505-0.043,38.887-0.074
+			c17.803-0.055,17.803-0.055,17.803-3.072l0.3-10.697V333.299c0-8.434-6.866-15.3-15.3-15.3h-11.909c-8.434,0-15.3,6.866-15.3,15.3
+			V496.22c0,5.062-4.119,9.18-9.181,9.18H110.51c-5.061,0-9.18-4.118-9.18-9.18V333.299c0-8.434-6.867-15.3-15.3-15.3H73.82
+			c-8.433,0-15.3,6.86-15.3,15.3c0,23.342,0.012,76.084,0.055,122.981C58.594,479.727,58.625,501.722,58.667,517.854z"/>
+		<path d="M142.322,397.399l189.402,17.467c0.478,0.043,0.948,0.062,1.413,0.062c7.956,0,14.468-5.985,15.159-13.917l1.83-21.096
+			c0.729-8.396-5.508-15.851-13.898-16.628l-189.102-17.461c-8.593-0.795-15.869,5.441-16.653,13.825l-1.97,21.108
+			c-0.38,4.069,0.844,8.042,3.452,11.181C134.567,395.087,138.252,397.026,142.322,397.399z"/>
+		<path d="M437.636,208.849c1.273,7.344,7.607,12.675,15.05,12.675c0.875,0,1.756-0.074,2.644-0.232l21.065-3.678
+			c8.311-1.451,13.898-9.395,12.454-17.706L456.345,12.678c-1.42-8.207-9.21-13.917-17.692-12.448l-21.065,3.678
+			c-8.311,1.451-13.898,9.395-12.454,17.705L437.636,208.849z"/>
+		<path d="M190.333,194.375l163.6,96.708c2.356,1.396,5.049,2.136,7.778,2.136c5.393,0,10.447-2.876,13.183-7.509l10.876-18.36
+			c2.08-3.519,2.674-7.631,1.658-11.591c-1.016-3.954-3.513-7.283-7.032-9.358l-163.6-96.714
+			c-7.014-4.149-16.836-1.597-20.967,5.374l-10.869,18.36c-2.081,3.519-2.674,7.638-1.658,11.591
+			C184.317,188.971,186.82,192.294,190.333,194.375z"/>
+		<path d="M387.525,240.501c2.853,4.174,7.57,6.659,12.626,6.659c3.091,0,6.077-0.924,8.635-2.681l17.405-11.934
+			c6.953-4.768,8.752-14.314,4.015-21.292L323.29,54.104c-4.584-6.732-14.498-8.623-21.236-3.984L284.317,62.33
+			c-6.945,4.779-8.727,14.327-3.971,21.291L387.525,240.501z"/>
+		<path d="M154.482,302.319l183.465,49.156c1.298,0.349,2.632,0.526,3.966,0.526c6.903,0,12.98-4.67,14.762-11.347l5.508-20.624
+			c2.179-8.152-2.681-16.555-10.826-18.74l-183.465-49.162c-8.017-2.148-16.604,2.852-18.728,10.826l-5.508,20.63
+			C141.477,291.726,146.336,300.135,154.482,302.319z"/>
+	</g>
+</g>
+</svg>
+</a></li>
+        </ul>
+      </div>
+      <div class="subscribe">
+<style type="text/css" media="screen">
+    #mc_embed_signup .response {
+        margin-top: 12px;
+        line-height: 1.4;
+        font-size: 0.65rem;
+    }
+</style>
+<div id="mc_embed_signup">
+    <form action="//pingcap.us16.list-manage.com/subscribe/post?u=ab57beb8a88391cf6193c1b48&amp;id=7c67af4f9d" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+        <div id="mc_embed_signup_scroll">
+            <div class="form-inline">
+                <input type="email" value="" name="EMAIL" id="mce-EMAIL" class="form-control" placeholder="Subscribe to our newsletter">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="btn btn-subscribe f-tc">
+            </div>
+            <div id="mce-responses" class="clear">
+                <div class="response" id="mce-error-response" style="display:none"></div>
+                <div class="response" id="mce-success-response" style="display:none"></div>
+            </div>
+            
+            <div style="position: absolute; left: -5000px;" aria-hidden="true">
+                <input type="text" name="b_ab57beb8a88391cf6193c1b48_7c67af4f9d" tabindex="-1" value="">
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" src="https://download.pingcap.com/js/mc-validate.js"></script>
+<script type='text/javascript'>
+;(function($) {
+  window.fnames = new Array()
+  window.ftypes = new Array()
+  fnames[0] = 'EMAIL'
+  ftypes[0] = 'email'
+  fnames[1] = 'FNAME'
+  ftypes[1] = 'text'
+  fnames[2] = 'LNAME'
+  ftypes[2] = 'text'
+})(jQuery)
+var $mcj = jQuery.noConflict(true)
+</script>
+
+</div>
+    </div>
+    <div class="container">
+      <a href="/docs-cn/op-guide/gc" class="btn-lang" id="lang">中文</a>
+    </div>
+  </div>
+</nav>
+
+  
+<div class="doc">
+  <div class="container content-container">
+    <div class="sidebar">
+      <div class="sticky-sidebar">
+        <h2 class="title"> Document </h2>
+        <div class="st_tree nav-toc">
+          <ul>
+  
+    
+      <li class="has-child"><a href="#">About TiDB<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/overview/#tidb-introduction">TiDB Introduction</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/overview/#tidb-architecture">TiDB Architecture</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/QUICKSTART/">TiDB Quick Start Guide</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="https://www.pingcap.com/blog/how_to_spin_up_an_htap_database_in_5_minutes_with_tidb_tispark/">TiDB Tutorial</a>
+    </li>
+    
+  
+    
+      <li class="has-child"><a href="#">TiDB User Guide<i class="icon"></i></a>
+        <ul>
+  
+    
+      <li class="has-child"><a href="#">TiDB Server Administration<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/tidb-server/">The TiDB Server</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/server-command-option/">The TiDB Command Options</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/tidb-server/#tidb-data-directory">The TiDB Data Directory</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/system-database/">The TiDB System Database</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/variable/">The TiDB System Variables</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/tidb-specific/">The Proprietary System Variables and Syntax in TiDB</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/tidb-server/#tidb-server-logs">The TiDB Server Logs</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/privilege/">The TiDB Access Privilege System</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/user-account-management/">TiDB User Account Management</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/encrypted-connections/">Use Encrypted Connections</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">SQL Optimization<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/understanding-the-query-execution-plan/">Understand the Query Execution Plan</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/statistics/">Introduction to Statistics</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Language Structure<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/literal-values/">Literal Values</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/schema-object-names/">Schema Object Names</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/keywords-and-reserved-words/">Keywords and Reserved Words</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/user-defined-variables/">User-Defined Variables</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/expression-syntax/">Expression Syntax</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/comment-syntax/">Comment Syntax</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Globalization<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/character-set-support/">Character Set Support</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/character-set-configuration/">Character Set Configuration</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/time-zone/">Time Zone</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Data Types<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/datatype/#numeric-types">Numeric Types</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/datatype/#date-and-time-types">Date and Time Types</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/datatype/#string-types">String Types</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/datatype/#json-types">JSON Types</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/datatype/#the-enum-data-type">The ENUM data type</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/datatype/#the-set-type">The SET Type</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/datatype/#data-type-default-values">Data Type Default Values</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Functions and Operators<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/functions-and-operators-reference/">Function and Operator Reference</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/type-conversion-in-expression-evaluation/">Type Conversion in Expression Evaluation</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/operators/">Operators</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/control-flow-functions/">Control Flow Functions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/string-functions/">String Functions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/numeric-functions-and-operators/">Numeric Functions and Operators</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/date-and-time-functions/">Date and Time Functions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/bit-functions-and-operators/">Bit Functions and Operators</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/cast-functions-and-operators/">Cast Functions and Operators</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/encryption-and-compression-functions/">Encryption and Compression Functions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/information-functions/">Information Functions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/json-functions/">JSON Functions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/aggregate-group-by-functions/">Aggregate (GROUP BY) Functions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/miscellaneous-functions/">Miscellaneous Functions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/precision-math/">Precision Math</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">SQL Statement Syntax<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/ddl/">Data Definition Statements</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/dml/">Data Manipulation Statements</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/transaction/">Transactions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/admin/">Database Administration Statements</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/prepare/">Prepared SQL Statement Syntax</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/util/">Utility Statements</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="https://pingcap.github.io/sqlgram/">TiDB SQL Syntax Diagram</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/json-functions-generated-column/">JSON Functions and Generated Column</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/connection-and-APIs/">Connectors and APIs</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/transaction-isolation/">TiDB Transaction Isolation Levels</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/error/">Error Codes and Troubleshooting</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/mysql-compatibility/">Compatibility with MySQL</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/sql/tidb-memory-control/">TiDB Memory Control</a>
+    </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Advanced Usage<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/history-read/">Read Data From History Versions</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/gc/">Garbage Collection (GC)</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">TiDB Operations Guide<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/recommendation/">Hardware and Software Requirements</a>
+    </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Deploy<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/ansible-deployment/">Ansible Deployment (Recommended)</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/offline-ansible-deployment/">Offline Deployment Using Ansible</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/docker-deployment/">Docker Deployment</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/docker-compose/">Docker Compose Deployment</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/location-awareness/">Cross-Region Deployment</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Configure<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/configuration/">Configuration Flags</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/tidb-config-file/">Configuration File Description</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/ansible-deployment-rolling-update/#modify-component-configuration">Modify Component Configuration Using Ansible</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/security/">Enable TLS Authentication</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/generate-self-signed-certificates/">Generate Self-signed Certificates</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Monitor<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/monitor-overview/">Overview of the Monitoring Framework</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/dashboard-overview-info/">Key Metrics</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/monitor/">Monitor a TiDB Cluster</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Scale<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/horizontal-scale/">Scale a TiDB Cluster</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/ansible-deployment-scale/">Scale Using Ansible</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Upgrade<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/ansible-deployment-rolling-update/#upgrade-the-component-version">Upgrade the Component Version</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/tidb-v2-upgrade-guide/">TiDB 2.0 Upgrade Guide</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/tune-tikv/">Tune Performance</a>
+    </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Backup and Migrate<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/backup-restore/">Backup and Restore</a>
+    </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Migrate<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/migration-overview/">Migration Overview</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/migration/#use-the-mydumper--loader-tool-to-export-and-import-all-the-data">Migrate All the Data</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/migration/#use-the-syncer-tool-to-import-data-incrementally-optional">Migrate the Data Incrementally</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/ansible-operation/">TiDB-Ansible Common Operations</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/trouble-shooting/">Troubleshoot</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">TiDB Enterprise Tools<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tools/syncer/">Syncer</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tools/loader/">Loader</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tools/tidb-binlog-kafka/">TiDB-Binlog</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tools/pd-control/">PD Control</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tools/tikv-control/">TiKV Control</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tools/tidb-controller/">TiDB Controller</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">TiKV Documentation<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tikv/tikv-overview/">Overview</a>
+    </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Install and Deploy TiKV<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/op-guide/recommendation/">Prerequisites</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tikv/deploy-tikv-docker-compose/">Install and Deploy TiKV Using Docker Compose</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tikv/deploy-tikv-using-ansible/">Install and Deploy TiKV Using Ansible</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tikv/deploy-tikv-using-docker/">Install and Deploy TiKV Using Docker</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Client Drivers<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tikv/go-client-api/">Go</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+      <li class="has-child"><a href="#">TiSpark Documentation<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tispark/tispark-quick-start-guide/">Quick Start Guide</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/tispark/tispark-user-guide/">User Guide</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/FAQ/">Frequently Asked Questions (FAQ)</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="https://pingcap.github.io/blog/2017/07/24/tidbbestpractice/">TiDB Best Practices</a>
+    </li>
+    
+  
+    
+      <li class="has-child"><a href="#">Releases<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/205/">2.0.5</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/21beta/">2.1 Beta</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/204/">2.0.4</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/203/">2.0.3</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/202/">2.0.2</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/201/">2.0.1</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/2.0ga/">2.0</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/2rc5/">2.0 RC5</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/2rc4/">2.0 RC4</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/2rc3/">2.0 RC3</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/2rc1/">2.0 RC1</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/11beta/">1.1 Beta</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/108/">1.0.8</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/107/">1.0.7</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/11alpha/">1.1 Alpha</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/106/">1.0.6</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/105/">1.0.5</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/104/">1.0.4</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/103/">1.0.3</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/102/">1.0.2</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/101/">1.0.1</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/ga/">1.0</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/prega/">Pre-GA</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/rc4/">RC4</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/rc3/">RC3</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/rc2/">RC2</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/releases/rc1/">RC1</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/adopters/">TiDB Adopters</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/ROADMAP/">TiDB Roadmap</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="/docs/community/">Connect with us</a>
+    </li>
+    
+  
+    
+      <li class="has-child"><a href="#">More Resources<i class="icon"></i></a>
+        <ul>
+  
+    
+    <li class="leaf-child">
+      <a href="https://github.com/pingcap/tidb-tools">Frequently Used Tools</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="https://pingcap.com/blog/">PingCAP Blog</a>
+    </li>
+    
+  
+    
+    <li class="leaf-child">
+      <a href="https://pingcap.com/weekly/">Weekly Update</a>
+    </li>
+    
+  
+</ul>
+
+      </li>
+    
+  
+</ul>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="archive">
+      <div class="content markdown-body">
+        
+
+<h1 id="tidb-garbage-collection-gc">TiDB Garbage Collection (GC)</h1>
+
+<p>TiDB uses MVCC to control concurrency. When you update or delete data, the original data is not deleted immediately but is kept for a period during which it can be read. Thus the write operation and the read operation are not mutually exclusive and it is possible to read the history versions of the data.</p>
+
+<p>The data versions whose duration exceeds a specific time and that are not used any more will be cleared, otherwise they will occupy the disk space and affect TiDB&rsquo;s performance. TiDB uses Garbage Collection (GC) to clear the obsolete data.</p>
+
+<h2 id="working-mechanism">Working mechanism</h2>
+
+<p>GC runs periodically on TiDB. When a TiDB server is started, a <code>gc_worker</code> is enabled in the background. In each TiDB cluster, one <code>gc_worker</code> is elected to be the leader which is used to maintain the GC status and send GC commands to all the TiKV Region leaders.</p>
+
+<h2 id="configuration-and-monitor">Configuration and monitor</h2>
+
+<p>The GC configuration and operational status are recorded in the <code>mysql.tidb</code> system table as below, which can be monitored and configured using SQL statements:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql">mysql<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">select</span> VARIABLE_NAME, VARIABLE_VALUE <span style="color:#66d9ef">from</span> mysql.tidb;
+<span style="color:#f92672">+</span><span style="color:#75715e">-----------------------+------------------------------------------------------------------------------------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> VARIABLE_NAME         <span style="color:#f92672">|</span> VARIABLE_VALUE                                                                                 <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">-----------------------+------------------------------------------------------------------------------------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> bootstrapped          <span style="color:#f92672">|</span> <span style="color:#66d9ef">True</span>                                                                                           <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tidb_server_version   <span style="color:#f92672">|</span> <span style="color:#ae81ff">18</span>                                                                                             <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tikv_gc_leader_uuid   <span style="color:#f92672">|</span> <span style="color:#ae81ff">58</span>accebfa7c0004                                                                                <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tikv_gc_leader_desc   <span style="color:#f92672">|</span> <span style="color:#66d9ef">host</span>:ip<span style="color:#f92672">-</span><span style="color:#ae81ff">172</span><span style="color:#f92672">-</span><span style="color:#ae81ff">16</span><span style="color:#f92672">-</span><span style="color:#ae81ff">30</span><span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>, pid:<span style="color:#ae81ff">95472</span>, <span style="color:#66d9ef">start</span> <span style="color:#66d9ef">at</span> <span style="color:#ae81ff">2018</span><span style="color:#f92672">-</span><span style="color:#ae81ff">04</span><span style="color:#f92672">-</span><span style="color:#ae81ff">11</span> <span style="color:#ae81ff">13</span>:<span style="color:#ae81ff">43</span>:<span style="color:#ae81ff">30</span>.<span style="color:#ae81ff">73076656</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0800</span> CST m<span style="color:#f92672">=+</span><span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">068873865</span> <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tikv_gc_leader_lease  <span style="color:#f92672">|</span> <span style="color:#ae81ff">20180418</span><span style="color:#f92672">-</span><span style="color:#ae81ff">11</span>:<span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">30</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0800</span> CST                                                                    <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tikv_gc_run_interval  <span style="color:#f92672">|</span> <span style="color:#ae81ff">10</span>m0s                                                                                          <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tikv_gc_life_time     <span style="color:#f92672">|</span> <span style="color:#ae81ff">10</span>m0s                                                                                          <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tikv_gc_last_run_time <span style="color:#f92672">|</span> <span style="color:#ae81ff">20180418</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span>:<span style="color:#ae81ff">59</span>:<span style="color:#ae81ff">30</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0800</span> CST                                                                    <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tikv_gc_safe_point    <span style="color:#f92672">|</span> <span style="color:#ae81ff">20180418</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span>:<span style="color:#ae81ff">58</span>:<span style="color:#ae81ff">30</span> <span style="color:#f92672">+</span><span style="color:#ae81ff">0800</span> CST                                                                    <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> tikv_gc_concurrency   <span style="color:#f92672">|</span> <span style="color:#ae81ff">1</span>                                                                                              <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">-----------------------+------------------------------------------------------------------------------------------------+
+</span><span style="color:#75715e"></span><span style="color:#ae81ff">10</span> <span style="color:#66d9ef">rows</span> <span style="color:#66d9ef">in</span> <span style="color:#66d9ef">set</span> (<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">02</span> sec)</code></pre></div>
+<p>In the table above, <code>tikv_gc_run_interval</code>, <code>tikv_gc_life_time</code> and <code>tikv_gc_concurrency</code> can be configured manually. Other variables with the <code>tikv_gc</code> prefix record the current status, which are automatically updated by TiDB. Do not modify these variables.</p>
+
+<ul>
+<li><p><code>tikv_gc_leader_uuid</code>, <code>tikv_gc_leader_desc</code>, <code>tikv_gc_leader_lease</code>: the current GC leader information.</p></li>
+
+<li><p><code>tikv_gc_run_interval</code>: the interval of GC work. The value is 10 min by default and cannot be smaller than 10 min.</p></li>
+
+<li><p><code>tikv_gc_life_time</code>: the retention period of data versions; The value is 10 min by default and cannot be smaller than 10 min.</p>
+
+<p>When GC works, the outdated data is cleared. You can set it using the SQL statement. For example, if you want to retain the data within a day, you can execute the operation as below:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">update</span> mysql.tidb <span style="color:#66d9ef">set</span> VARIABLE_VALUE <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;24h&#39;</span> <span style="color:#66d9ef">where</span> VARIABLE_NAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;tikv_gc_life_time&#39;</span>;</code></pre></div>
+<p>The duration strings are a sequence of a number with the time unit, such as 24h, 2h30m and 2.5h. The time units you can use include &ldquo;h&rdquo;, &ldquo;m&rdquo; and &ldquo;s&rdquo;.</p>
+
+<blockquote>
+<p><strong>Note</strong>: When you set <code>tikv_gc_life_time</code> to a large number (like days or even months) in a data updated frequently scenario, some problems as follows may occur:</p>
+</blockquote>
+
+<ul>
+<li>The more versions of the data, the more disk storage space is occupied.</li>
+<li>A large number of history versions might slow down the query. They may affect range queries like <code>select count(*) from t</code>.</li>
+<li>If <code>tikv_gc_life_time</code> is suddenly turned to a smaller value during operation, a great deal of old data may be deleted in a short time, causing I/O pressure.</li>
+</ul></li>
+
+<li><p><code>tikv_gc_last_run_time</code>: the last time GC works.</p></li>
+
+<li><p><code>tikv_gc_safe_point</code>: the time that versions before which are cleared by GC and versions after which are readable.</p></li>
+
+<li><p><code>tikv_gc_concurrency</code>: the GC concurrency. It is set to 1 by default. In this case, a single thread operates and threads send request to each Region and wait for the response one by one. You can set the variable value larger to improve the system performance, but keep the value smaller than 128.</p></li>
+</ul>
+
+<h2 id="implementation-details">Implementation details</h2>
+
+<p>The GC implementation process is complex. When the obsolete data is cleared, data consistency is guaranteed. The process of doing GC is as below:</p>
+
+<h3 id="1-resolve-locks">1. Resolve locks</h3>
+
+<p>The TiDB transaction model is inspired by Google&rsquo;s Percolator. It&rsquo;s mainly a two-phase commit protocol with some practical optimizations. When the first phase is finished, all the related keys are locked. Among these locks, one is the primary lock and the others are secondary locks which contain a pointer of the primary locks; in the secondary phase, the key with the primary lock gets a write record and its lock is removed. The write record indicates the write or delete operation in the history or the transactional rollback record of this key. Replacing the primary lock with which write record indicates whether the corresponding transaction is committed successfully. Then all the secondary locks are replaced successively. If the threads to replace the secondary locks fail, these locks are retained. During GC, the lock whose timestamp is before the safe point is replaced with the corresponding write record based on the transaction committing status.</p>
+
+<blockquote>
+<p><strong>Note</strong>: This is a required step. Once GC has cleared the write record of the primary lock, you can never know whether this transaction is successful or not. As a result, data consistency cannot be guaranteed.</p>
+</blockquote>
+
+<h3 id="2-delete-ranges">2. Delete ranges</h3>
+
+<p><code>DeleteRanges</code> is usually executed after operations like <code>drop table</code>, used to delete a range which might be very large. If the <code>use_delete_range</code> option of TiKV is not enabled, TiKV deletes the keys in the range.</p>
+
+<h3 id="3-do-gc">3. Do GC</h3>
+
+<p>Clear the data before the safe point of each key and the write record.</p>
+
+<blockquote>
+<p><strong>Note</strong>: If the last record in all the write records of <code>Put</code> and <code>Delete</code> types before the safe point is <code>Put</code>, this record and its data cannot be deleted directly. Otherwise, you cannot successfully perform the read operation whose timestamp is after the safe point and before the next version of the key.</p>
+</blockquote>
+
+      </div>
+      <div class="article-toc"></div>
+      
+
+
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div class="git-info">
+        <a class="link" href="https://github.com/pingcap/docs/blob/master/op-guide/gc.md">"TiDB Garbage Collection (GC)"</a>
+        
+          was last updated
+        
+        <span>Jul 26 2018</span>:
+        <a class="link" href="https://github.com/pingcap/docs/commit/c1e613dfdd956d3f97b51ff5e8bd311c99611f5a">
+          *: add summary metadata to all docs files for SEO (#550)
+          <span class="hash">(c1e613d)</span>
+        </a>
+      </div>
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+    
+  
+
+  
+
+
+    </div>
+
+    <div class="sidebar-page">
+      <div class="sticky-sidebar">
+        <a href="https://github.com/pingcap/docs/edit/master/op-guide/gc.md" class="improve-doc" target="_blank">
+  <svg
+	version="1.1"
+	xmlns="http://www.w3.org/2000/svg"
+	xmlns:xlink="http://www.w3.org/1999/xlink"
+	x="0px"
+	y="0px"
+	width="14"
+	height="14"
+	fill="#142848"
+	viewBox="0 0 275.836 275.836"
+	style="enable-background:new 0 0 275.836 275.836;"
+	xml:space="preserve">
+	<g>
+		<path
+			d="M191.344,20.922l-95.155,95.155c-0.756,0.756-1.297,1.699-1.565,2.734l-8.167,31.454c-0.534,2.059,0.061,4.246,1.565,5.751
+		c1.14,1.139,2.671,1.757,4.242,1.757c0.503,0,1.009-0.063,1.508-0.192l31.454-8.168c1.035-0.269,1.979-0.81,2.734-1.565
+		l95.153-95.153c0.002-0.002,0.004-0.003,0.005-0.004s0.003-0.004,0.004-0.005l19.156-19.156c2.344-2.343,2.344-6.142,0.001-8.484
+		L218.994,1.758C217.868,0.632,216.343,0,214.751,0c-1.591,0-3.117,0.632-4.242,1.758l-19.155,19.155
+		c-0.002,0.002-0.004,0.003-0.005,0.004S191.346,20.921,191.344,20.922z M120.631,138.208l-19.993,5.192l5.191-19.993l89.762-89.762
+		l14.801,14.802L120.631,138.208z M214.751,14.485l14.801,14.802l-10.675,10.675L204.076,25.16L214.751,14.485z"/>
+		<path
+			d="M238.037,65.022c-3.313,0-6,2.687-6,6v192.813H43.799V34.417h111.063c3.313,0,6-2.687,6-6s-2.687-6-6-6H37.799
+		c-3.313,0-6,2.687-6,6v241.419c0,3.313,2.687,6,6,6h200.238c3.313,0,6-2.687,6-6V71.022
+		C244.037,67.709,241.351,65.022,238.037,65.022z"/>
+	</g>
+</svg>
+
+  Improve this page
+</a>
+
+        <p class="toc-title">What’s on this page</p>
+        <div id="smarttoc_wrapper"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+<footer>
+  <div class="container">
+    <div class="flex-list-wrap">
+      <div class="flex-list">
+        <h4 class="list-title"><strong>Product</strong></h4>
+        <ul>
+          <li><a href="/docs/">TiDB</a></li>
+          <li><a href="/docs/tispark/tispark-user-guide/">TiSpark</a></li>
+          <li><a href="/docs/ROADMAP/">Roadmap</a></li>
+        </ul>
+      </div>
+      <div class="flex-list">
+        <h4 class="list-title"><strong>Docs</strong></h4>
+        <ul>
+          <li><a href="/docs/QUICKSTART/">Quick Start</a></li>
+          <li><a href="/blog/2017-07-24-tidbbestpractice/">Best Practices</a></li>
+          <li><a href="/docs/FAQ/">FAQ</a></li>
+          <li><a href="/docs/tools/syncer/">TiDB Utilities</a></li>
+          <li><a href="/docs/releases/rn/">Release Notes</a></li>
+        </ul>
+      </div>
+      <div class="flex-list">
+        <h4 class="list-title"><strong>Resources</strong></h4>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="https://github.com/pingcap" target="_blank">GitHub</a></li>
+        </ul>
+      </div>
+      <div class="flex-list">
+        <h4 class="list-title"><strong>Company</strong></h4>
+        <ul>
+          <li><a href="/about/">About</a></li>
+          <li><a href="https://angel.co/pingcap-1/jobs" target="_blank">Careers</a></li>
+          <li><a href="/news/">News</a></li>
+          <li><a href="/contact-us/">Contact Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="contact-list-wrap">
+      <div class="flex-list">
+        <h4 class="list-title"><strong>Connect</strong></h4>
+        <ul>
+          <li><a href="https://twitter.com/PingCAP" class="twitter" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 612 612" xml:space="preserve" width="18" height="18">
+<g>
+	<g>
+		<path d="M612,116.258c-22.525,9.981-46.694,16.75-72.088,19.772c25.929-15.527,45.777-40.155,55.184-69.411    c-24.322,14.379-51.169,24.82-79.775,30.48c-22.907-24.437-55.49-39.658-91.63-39.658c-69.334,0-125.551,56.217-125.551,125.513    c0,9.828,1.109,19.427,3.251,28.606C197.065,206.32,104.556,156.337,42.641,80.386c-10.823,18.51-16.98,40.078-16.98,63.101    c0,43.559,22.181,81.993,55.835,104.479c-20.575-0.688-39.926-6.348-56.867-15.756v1.568c0,60.806,43.291,111.554,100.693,123.104    c-10.517,2.83-21.607,4.398-33.08,4.398c-8.107,0-15.947-0.803-23.634-2.333c15.985,49.907,62.336,86.199,117.253,87.194    c-42.947,33.654-97.099,53.655-155.916,53.655c-10.134,0-20.116-0.612-29.944-1.721c55.567,35.681,121.536,56.485,192.438,56.485    c230.948,0,357.188-191.291,357.188-357.188l-0.421-16.253C573.872,163.526,595.211,141.422,612,116.258z" />
+	</g>
+</g>
+</svg>
+ Twitter</a></li>
+          <li><a href="https://www.linkedin.com/company/pingcap/" class="linkedin" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="18" height="18" viewBox="0 0 438.536 438.535" xml:space="preserve">
+<g>
+	<g>
+		<rect x="5.424" y="145.895" width="94.216" height="282.932"/>
+		<path d="M408.842,171.739c-19.791-21.604-45.967-32.408-78.512-32.408c-11.991,0-22.891,1.475-32.695,4.427
+			c-9.801,2.95-18.079,7.089-24.838,12.419c-6.755,5.33-12.135,10.278-16.129,14.844c-3.798,4.337-7.512,9.389-11.136,15.104
+			v-40.232h-93.935l0.288,13.706c0.193,9.139,0.288,37.307,0.288,84.508c0,47.205-0.19,108.777-0.572,184.722h93.931V270.942
+			c0-9.705,1.041-17.412,3.139-23.127c4-9.712,10.037-17.843,18.131-24.407c8.093-6.572,18.13-9.855,30.125-9.855
+			c16.364,0,28.407,5.662,36.117,16.987c7.707,11.324,11.561,26.98,11.561,46.966V428.82h93.931V266.664
+			C438.529,224.976,428.639,193.336,408.842,171.739z"/>
+		<path d="M53.103,9.708c-15.796,0-28.595,4.619-38.4,13.848C4.899,32.787,0,44.441,0,58.529c0,13.891,4.758,25.505,14.275,34.829
+			c9.514,9.325,22.078,13.99,37.685,13.99h0.571c15.99,0,28.887-4.661,38.688-13.99c9.801-9.324,14.606-20.934,14.417-34.829
+			c-0.19-14.087-5.047-25.742-14.561-34.973C81.562,14.323,68.9,9.708,53.103,9.708z"/>
+	</g>
+</g>
+</svg>
+ LinkedIn</a></li>
+          <li><a href="https://www.reddit.com/r/TiDB/" class="reddit" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 279.748 279.748" xml:space="preserve" width="18" height="18">
+<path d="M279.748,133.142c0-19.299-15.701-35-35-35c-10.768,0-20.674,4.812-27.279,13.064
+	c-18.532-8.431-39.663-13.626-62.015-15.271l19.206-60.692l42.895,9.294c3.285,12.782,14.901,22.258,28.693,22.258
+	c16.336,0,29.627-13.29,29.627-29.626c0-16.336-13.291-29.627-29.627-29.627c-11.801,0-21.999,6.941-26.759,16.95l-49.497-10.725
+	c-5.041-1.092-10.094,1.833-11.651,6.756l-23.705,74.907c-26.164,0.638-50.988,6.053-72.356,15.775
+	C55.674,102.954,45.768,98.142,35,98.142c-19.299,0-35,15.701-35,35c0,9.373,3.683,18.173,10.222,24.709
+	c-3.9,8.37-5.875,17.076-5.875,25.936c0,24.048,14.396,46.492,40.538,63.199c25.447,16.264,59.183,25.221,94.989,25.221
+	c35.808,0,69.542-8.957,94.989-25.221c26.142-16.707,40.538-39.151,40.538-63.199c0-8.859-1.975-17.565-5.875-25.936
+	C276.065,151.314,279.748,142.515,279.748,133.142z M15.369,145.139c-2.212-3.59-3.369-7.688-3.369-11.997c0-12.682,10.317-23,23-23
+	c5.444,0,10.558,1.851,14.649,5.258C35.027,123.702,23.517,133.689,15.369,145.139z M68.04,165.405c0-13.785,11.215-25,25-25
+	c13.785,0,25,11.215,25,25c0,13.785-11.215,25-25,25C79.255,190.405,68.04,179.19,68.04,165.405z M191.159,222.459
+	c-9.745,10.637-29.396,17.244-51.285,17.244c-21.888,0-41.539-6.607-51.284-17.244c-1.805-1.97-2.733-4.525-2.617-7.192
+	c0.116-2.669,1.266-5.133,3.235-6.937c1.849-1.694,4.247-2.627,6.754-2.627c2.797,0,5.484,1.183,7.373,3.244
+	c5.803,6.333,20.827,10.756,36.539,10.756c15.712,0,30.737-4.423,36.539-10.756c1.889-2.062,4.576-3.244,7.374-3.244
+	c2.508,0,4.906,0.933,6.755,2.627c1.97,1.804,3.118,4.268,3.234,6.937C193.893,217.934,192.964,220.489,191.159,222.459z
+	 M186.708,190.405c-13.785,0-25-11.215-25-25c0-13.785,11.215-25,25-25c13.785,0,25,11.215,25,25
+	C211.708,179.19,200.493,190.405,186.708,190.405z M264.379,145.139c-8.147-11.45-19.657-21.436-34.28-29.739
+	c4.092-3.408,9.205-5.258,14.649-5.258c12.683,0,23,10.318,23,23C267.748,137.451,266.591,141.549,264.379,145.139z"/>
+</svg>
+Reddit</a></li>
+          <li><a href="https://groups.google.com/forum/#!forum/tidb-user" class="google-plus" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 491.858 491.858" xml:space="preserve" width="18" height="18">
+<g>
+	<g>
+		<g>
+			<path d="M377.472,224.957H201.319v58.718H308.79c-16.032,51.048-63.714,88.077-120.055,88.077     c-69.492,0-125.823-56.335-125.823-125.824c0-69.492,56.333-125.823,125.823-125.823c34.994,0,66.645,14.289,89.452,37.346     l42.622-46.328c-34.04-33.355-80.65-53.929-132.074-53.929C84.5,57.193,0,141.693,0,245.928s84.5,188.737,188.736,188.737     c91.307,0,171.248-64.844,188.737-150.989v-58.718L377.472,224.957L377.472,224.957z" />
+			<polygon points="491.858,224.857 455.827,224.857 455.827,188.826 424.941,188.826 424.941,224.857 388.91,224.857      388.91,255.74 424.941,255.74 424.941,291.772 455.827,291.772 455.827,255.74 491.858,255.74" />
+		</g>
+	</g>
+</g>
+</svg>
+Google Group</a></li>
+          <li><a href="https://stackoverflow.com/questions/tagged/tidb" class="stack-overflow" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="18" height="18" viewBox="0 0 547.597 547.597" xml:space="preserve">
+<g>
+	<g>
+		<path d="M140.81,475.111h0.024l189.91-0.269c8.434-0.013,15.3-6.886,15.3-15.318v-21.298c0-8.428-6.854-15.288-15.3-15.288
+			l-189.91,0.264c-8.433,0.012-15.3,6.885-15.3,15.318v21.31C125.535,468.257,132.389,475.111,140.81,475.111z"/>
+		<path d="M58.667,517.854c0.073,29.26,0.073,29.449,3.072,29.449c0.018,0,0.037,0,0.055,0l10.612,0.294c0.031,0,0.055,0,0.086,0
+			c0,0,85.814,0,171.629-0.036c42.914-0.019,85.821-0.05,118-0.092c16.09-0.019,29.505-0.043,38.887-0.074
+			c17.803-0.055,17.803-0.055,17.803-3.072l0.3-10.697V333.299c0-8.434-6.866-15.3-15.3-15.3h-11.909c-8.434,0-15.3,6.866-15.3,15.3
+			V496.22c0,5.062-4.119,9.18-9.181,9.18H110.51c-5.061,0-9.18-4.118-9.18-9.18V333.299c0-8.434-6.867-15.3-15.3-15.3H73.82
+			c-8.433,0-15.3,6.86-15.3,15.3c0,23.342,0.012,76.084,0.055,122.981C58.594,479.727,58.625,501.722,58.667,517.854z"/>
+		<path d="M142.322,397.399l189.402,17.467c0.478,0.043,0.948,0.062,1.413,0.062c7.956,0,14.468-5.985,15.159-13.917l1.83-21.096
+			c0.729-8.396-5.508-15.851-13.898-16.628l-189.102-17.461c-8.593-0.795-15.869,5.441-16.653,13.825l-1.97,21.108
+			c-0.38,4.069,0.844,8.042,3.452,11.181C134.567,395.087,138.252,397.026,142.322,397.399z"/>
+		<path d="M437.636,208.849c1.273,7.344,7.607,12.675,15.05,12.675c0.875,0,1.756-0.074,2.644-0.232l21.065-3.678
+			c8.311-1.451,13.898-9.395,12.454-17.706L456.345,12.678c-1.42-8.207-9.21-13.917-17.692-12.448l-21.065,3.678
+			c-8.311,1.451-13.898,9.395-12.454,17.705L437.636,208.849z"/>
+		<path d="M190.333,194.375l163.6,96.708c2.356,1.396,5.049,2.136,7.778,2.136c5.393,0,10.447-2.876,13.183-7.509l10.876-18.36
+			c2.08-3.519,2.674-7.631,1.658-11.591c-1.016-3.954-3.513-7.283-7.032-9.358l-163.6-96.714
+			c-7.014-4.149-16.836-1.597-20.967,5.374l-10.869,18.36c-2.081,3.519-2.674,7.638-1.658,11.591
+			C184.317,188.971,186.82,192.294,190.333,194.375z"/>
+		<path d="M387.525,240.501c2.853,4.174,7.57,6.659,12.626,6.659c3.091,0,6.077-0.924,8.635-2.681l17.405-11.934
+			c6.953-4.768,8.752-14.314,4.015-21.292L323.29,54.104c-4.584-6.732-14.498-8.623-21.236-3.984L284.317,62.33
+			c-6.945,4.779-8.727,14.327-3.971,21.291L387.525,240.501z"/>
+		<path d="M154.482,302.319l183.465,49.156c1.298,0.349,2.632,0.526,3.966,0.526c6.903,0,12.98-4.67,14.762-11.347l5.508-20.624
+			c2.179-8.152-2.681-16.555-10.826-18.74l-183.465-49.162c-8.017-2.148-16.604,2.852-18.728,10.826l-5.508,20.63
+			C141.477,291.726,146.336,300.135,154.482,302.319z"/>
+	</g>
+</g>
+</svg>
+Stack Overflow</a></li>
+        </ul>
+      </div>
+      <div class="subscribe">
+<style type="text/css" media="screen">
+    #mc_embed_signup .response {
+        margin-top: 12px;
+        line-height: 1.4;
+        font-size: 0.65rem;
+    }
+</style>
+<div id="mc_embed_signup">
+    <form action="//pingcap.us16.list-manage.com/subscribe/post?u=ab57beb8a88391cf6193c1b48&amp;id=7c67af4f9d" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+        <div id="mc_embed_signup_scroll">
+            <div class="form-inline">
+                <input type="email" value="" name="EMAIL" id="mce-EMAIL" class="form-control" placeholder="Subscribe to our newsletter">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="btn btn-subscribe f-tc">
+            </div>
+            <div id="mce-responses" class="clear">
+                <div class="response" id="mce-error-response" style="display:none"></div>
+                <div class="response" id="mce-success-response" style="display:none"></div>
+            </div>
+            
+            <div style="position: absolute; left: -5000px;" aria-hidden="true">
+                <input type="text" name="b_ab57beb8a88391cf6193c1b48_7c67af4f9d" tabindex="-1" value="">
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript" src="https://download.pingcap.com/js/mc-validate.js"></script>
+<script type='text/javascript'>
+;(function($) {
+  window.fnames = new Array()
+  window.ftypes = new Array()
+  fnames[0] = 'EMAIL'
+  ftypes[0] = 'email'
+  fnames[1] = 'FNAME'
+  ftypes[1] = 'text'
+  fnames[2] = 'LNAME'
+  ftypes[2] = 'text'
+})(jQuery)
+var $mcj = jQuery.noConflict(true)
+</script>
+
+</div>
+    </div>
+  </div>
+  <div class="container">
+    <p class="copyright">&copy; 2018 PingCAP. All Rights Reserved.</p>
+    <a href="/docs-cn/op-guide/gc" class="btn-lang" id="lang">中文</a>
+  </div>
+</footer>
+ <div class="overlay"></div><script src="https://download.pingcap.com/js/jquery.min.js"></script>  
+<link rel="stylesheet" href="https://download.pingcap.com/style/docsearch.min.css" />
+
+<script type="text/javascript" src="https://download.pingcap.com/js/docsearch.min.js"></script>
+<script type="text/javascript">
+docsearch({
+  apiKey: 'ad5e63b76a221558bdc65ab1abbec7a2',
+  indexName: 'pingcap',
+  inputSelector: '#search-input',
+  debug: true, 
+  transformData: function(hits) {
+    
+    function isChinese(s) {
+      var patrn = /\/.*-cn\//gi
+      return patrn.exec(s)
+    }
+
+    
+    function is404(h) {
+      var patrn = /404/gi
+      return h && h.lvl1 && patrn.exec(h.lvl1)
+    }
+
+    var en_hits = hits.filter(function(hit) {
+      return !isChinese(hit.url) && !is404(hit.hierarchy)
+    })
+
+    return en_hits
+  }
+})
+</script>
+ 
+<script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/4466002.js"></script>
+
+ <script type="text/javascript" src="/js/app.js"></script></body></html>

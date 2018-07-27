@@ -1,0 +1,259 @@
+/* base */
+@font-face {
+  font-family: "Lato";
+  src: url("https://download.pingcap.com/fonts/lato/lato-regular-webfont.eot"), url("https://download.pingcap.com/fonts/lato/lato-regular-webfont.ttf"), url("https://download.pingcap.com/fonts/lato/lato-regular-webfont.woff");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "TitilliumWeb";
+  src: url("https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.eot"), url("https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.ttf"), url("https://download.pingcap.com/fonts/titilliumweb/titilliumweb-regular-webfont.woff");
+  font-weight: normal;
+  font-style: normal;
+}
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(1em);
+            transform: translateY(1em);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(1em);
+            transform: translateY(1em);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+@-webkit-keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -100%, 0);
+            transform: translate3d(0, -100%, 0);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    -webkit-transform: translate3d(0, -100%, 0);
+            transform: translate3d(0, -100%, 0);
+  }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none;
+  }
+}
+body {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  font-family: "Lato", "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", Arial, sans-serif;
+}
+html,
+body {
+  font-size: 18px;
+}
+body,
+body * {
+  box-sizing: border-box;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+input,
+button,
+select,
+textarea {
+  outline: none;
+}
+button,
+input[type="submit"],
+input[type="button"] {
+  -webkit-appearance: none;
+}
+a,
+p a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.15s ease-out;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: "TitilliumWeb", "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", Arial, sans-serif;
+}
+.link,
+.link:active,
+.link:focus,
+.link:hover,
+.link:link,
+.link:visited {
+  transition: color 0.15s ease-in;
+}
+.container {
+  max-width: 1288px;
+  margin: 0 auto;
+}
+.f-blk,
+.f-img,
+.f-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.f-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+.f-hide {
+  display: none;
+}
+.f-fl {
+  float: left;
+}
+.f-fr {
+  float: right;
+}
+.f-tf {
+  text-align: left;
+}
+.f-tr {
+  text-align: right;
+}
+.f-tc {
+  text-align: center;
+}
+.f-vc {
+  position: absolute;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+}
+.f-vhc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+}
+/* 大屏幕 */
+@media (min-width: 992px) {
+  html,
+  body {
+    font-size: 20px;
+  }
+}
+/* 超大屏幕 */
+@media (min-width: 1920px) {
+  html,
+  body {
+    font-size: 22px;
+  }
+  .container {
+    max-width: 1520px;
+  }
+}
+/* 小屏幕（平板，大于等于 768px） */
+@media (max-width: 768px) {
+  html,
+  body {
+    font-size: 16px;
+  }
+}
+.hero {
+  background: #3d6cb9;
+}
+.hero__container {
+  margin: 0 auto;
+  max-width: 1288px;
+}
+.hero__inner {
+  margin: 0 auto;
+  padding: 60px 16px;
+  padding: 60px 1rem;
+}
+.hero__inner h1,
+.hero__inner h2 {
+  color: #fff;
+}
+.hero__heading {
+  max-width: 572px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+.hero__subheading {
+  margin: 15px auto 0;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 34px;
+}
+@media (min-width: 1920px) {
+  .hero__container {
+    max-width: 1520px;
+  }
+}
+@media (min-width: 992px) {
+  .hero__inner {
+    padding: 80px 1rem;
+  }
+  .hero__heading {
+    max-width: 732px;
+    font-size: 48px;
+  }
+  .hero__subheading {
+    max-width: 780px;
+    margin: 30px auto 0;
+    font-size: 26px;
+    line-height: 38px;
+  }
+}
+@media (min-width: 768px) {
+  .hero__subheading {
+    max-width: 600px;
+  }
+}
+@media (max-width: 500px) {
+  .hero__heading {
+    font-size: 32px;
+  }
+}
